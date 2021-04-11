@@ -12,28 +12,44 @@ def print_matrix(matrix):
         print(matrix[i : i + L])
 
 
+def up(i, L):
+    return i - L if i >= L else None
+
+
+def down(i, L):
+    return i + L if i <= L * L - L else None
+
+
+def right(i, L):
+    return i + 1 if (i + 1) % L != 0 else None
+
+
+def left(i, L):
+    return i - 1 if i % L != 0 else None
+
+
 def burn(matrix):
     def dfs(matrix, node, L):
-        def up(i):
-            return i - L if i >= L else None
+        path = [node]
 
-        def down(i):
-            return i + L if i <= L * L - L else None
+        while len(path):
+            s = path[-1]
+            if s > L * L - L:
+                return True
 
-        def right(i):
-            return i + 1 if (i + 1) % L != 0 else None
+            path.pop()
 
-        def left(i):
-            return i - 1 if i % L != 0 else None
+            if matrix[s] != 2:
+                matrix[s] = 2
 
-        if node > L * L - L:
-            return True
-
-        for neighbour in [up(node), down(node), right(node), left(node)]:
-            if neighbour != None and matrix[neighbour] == 1:
-                matrix[neighbour] = 2
-                if dfs(matrix, neighbour, L):
-                    return True
+            for neighbour in [
+                up(s, L),
+                down(s, L),
+                right(s, L),
+                left(s, L),
+            ]:
+                if neighbour != None and matrix[neighbour] == 1:
+                    path.append(neighbour)
 
         return False
 
@@ -41,7 +57,6 @@ def burn(matrix):
 
     for node in range(L):
         if matrix[node] == 1:
-            matrix[node] = 2
             if dfs(matrix, node, L):
                 return True
 
@@ -53,16 +68,10 @@ def hoshen_kopelman(matrix):
     M = {}
     k = 3
 
-    def up(i):
-        return i - L if i >= L else None
-
-    def left(i):
-        return i - 1 if i % L != 0 else None
-
     for i in range(len(matrix)):
         if matrix[i] == 1 or matrix[i] == 2:
-            nb_up = up(i)
-            nb_left = left(i)
+            nb_up = up(i, L)
+            nb_left = left(i, L)
 
             k_up = matrix[nb_up] if nb_up != None else 0
             k_left = matrix[nb_left] if nb_left != None else 0
@@ -111,7 +120,7 @@ def hoshen_kopelman(matrix):
 
 
 L = 10000
-mat = init_matrix(L, 0.57)
+mat = init_matrix(L, 0.7)
 # print_matrix(mat)
 print(burn(mat))
 # print_matrix(mat)
@@ -119,6 +128,6 @@ print(burn(mat))
 
 clusters, M = hoshen_kopelman(mat)
 # print_matrix(clusters)
-print(sum(0 if i == 0 else 1 for i in mat))
-print(sum(0 if i < 0 else i for i in M.values()))
+# print(sum(0 if i == 0 else 1 for i in mat))
+# print(sum(0 if i < 0 else i for i in M.values()))
 # print(M)
