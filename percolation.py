@@ -39,11 +39,86 @@ def burn(matrix):
 
     L = int(sqrt(len(matrix)))
 
-    return any([dfs(matrix, i, L) for i in range(L)])
+    for node in range(L):
+        if matrix[node] == 1:
+            matrix[node] = 2
+            if dfs(matrix, node, L):
+                return True
+
+    return False
 
 
-L = 100
+def hoshen_kopelman(matrix):
+    L = int(sqrt(len(matrix)))
+    M = {}
+    k = 3
+
+    def up(i):
+        return i - L if i >= L else None
+
+    def left(i):
+        return i - 1 if i % L != 0 else None
+
+    for i in range(len(matrix)):
+        if matrix[i] == 1 or matrix[i] == 2:
+            nb_up = up(i)
+            nb_left = left(i)
+
+            k_up = matrix[nb_up] if nb_up != None else 0
+            k_left = matrix[nb_left] if nb_left != None else 0
+
+            if k_up == 0 and k_left == 0:
+                matrix[i] = k
+                M[k] = 1
+                k += 1
+            elif k_up != 0 and k_left != 0:
+                k_1, k_2 = (k_up, k_left) if M[k_up] > 0 else (k_left, k_up)
+
+                M_1 = M[k_1]
+                real_1 = k_1
+                while M_1 < 0:
+                    real_1 = -M_1
+                    M_1 = M[-M_1]
+
+                M_2 = M[k_2]
+                real_2 = k_2
+                while M_2 < 0:
+                    real_2 = -M_2
+                    M_2 = M[-M_2]
+
+                if real_1 != real_2:
+                    matrix[i] = real_1
+
+                    M[real_1] = M_1 + M_2 + 1
+                    M[real_2] = -real_1
+                else:
+                    matrix[i] = real_1
+                    M[real_1] = M_1 + 1
+            elif k_up != 0 or k_left != 0:
+                k_0 = k_up if k_up != 0 else k_left
+
+                M_0 = M[k_0]
+                real_0 = k_0
+                while M_0 < 0:
+                    real_0 = -M_0
+                    M_0 = M[-M_0]
+
+                matrix[i] = real_0
+
+                M[real_0] = M_0 + 1
+
+    return (matrix, M)
+
+
+L = 10000
 mat = init_matrix(L, 0.57)
-print_matrix(mat)
+# print_matrix(mat)
 print(burn(mat))
+# print_matrix(mat)
+# print()
 
+clusters, M = hoshen_kopelman(mat)
+# print_matrix(clusters)
+print(sum(0 if i == 0 else 1 for i in mat))
+print(sum(0 if i < 0 else i for i in M.values()))
+# print(M)
