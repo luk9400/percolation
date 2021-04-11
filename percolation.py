@@ -1,5 +1,7 @@
 from random import random
 from math import sqrt
+from sys import argv
+import json
 
 
 def init_matrix(L, p):
@@ -17,7 +19,7 @@ def up(i, L):
 
 
 def down(i, L):
-    return i + L if i <= L * L - L else None
+    return i + L if i < L * L - L else None
 
 
 def right(i, L):
@@ -116,15 +118,51 @@ def hoshen_kopelman(matrix):
     return (matrix, M)
 
 
-L = 10
-mat = init_matrix(L, 0.57)
-print_matrix(mat)
-print(burn(mat))
-print_matrix(mat)
-print()
+def test(L, T, p_0, p_k, dp):
+    probabilities = []
+    i = p_0
+    while i <= p_k:
+        probabilities.append(i)
+        i += dp
 
-clusters, M = hoshen_kopelman(mat)
-print_matrix(clusters)
-print(sum(0 if i == 0 else 1 for i in mat))
-print(sum(0 if i < 0 else i for i in M.values()))
-print(M)
+    ave = []
+    dist = []
+    print(f"L: {L}, T: {T}")
+    for p in probabilities:
+        print(f"p: {p}")
+        s_max = 0
+        p_flow = 0
+        clusters_dist = {}
+
+        for _ in range(T):
+            matrix = init_matrix(L, p)
+            p_flow += int(burn(matrix))
+            _, M = hoshen_kopelman(matrix)
+
+            max_cluster = 0
+            for value in M.values():
+                if value > 0:
+                    if value > max_cluster:
+                        max_cluster = value
+
+                    if value in clusters_dist:
+                        clusters_dist[value] += 1
+                    else:
+                        clusters_dist[value] = 1
+            s_max += max_cluster
+
+        ave.append({"p": p, "p_flow": p_flow / T, "avg_s_max": s_max / T})
+        with open(f"./tests/Dist_p{p}L{L}T{T}.txt", "w") as f:
+            for key, value in sorted(clusters_dist.items()):
+                f.write(f"{key}  {value}\n")
+
+    with open(f"./tests/Ave_L{L}T{T}.txt", "w") as f:
+        for i in ave:
+            f.write(f"{i['p']}  {i['p_flow']}  {i['avg_s_max']}\n")
+
+
+if __name__ == "__main__":
+    if len(argv) >= 2:
+        with open(argv[1], "r") as file:
+            config = json.loads(file.read())
+            test(**config)
