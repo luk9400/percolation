@@ -46,9 +46,9 @@ def burn(matrix):
 
             for neighbour in [
                 up(s, L),
-                down(s, L),
-                right(s, L),
                 left(s, L),
+                right(s, L),
+                down(s, L),
             ]:
                 if neighbour != None and matrix[neighbour] == 1:
                     path.append(neighbour)
@@ -119,8 +119,8 @@ def hoshen_kopelman(matrix):
 
 
 def test(L, T, p_0, p_k, dp):
-    probabilities = []
-    i = p_0
+    probabilities = [p_0]
+    i = p_0 + dp
     while i <= p_k:
         probabilities.append(i)
         i += dp
@@ -161,8 +161,32 @@ def test(L, T, p_0, p_k, dp):
             f.write(f"{i['p']}  {i['p_flow']}  {i['avg_s_max']}\n")
 
 
+def matrix_to_csv(matrix, filename):
+    with open(filename, "w") as f:
+        L = int(sqrt(len(matrix)))
+        for i in range(0, len(matrix), L):
+            f.write(";".join(map(str, matrix[i : i + L])))
+            f.write("\n")
+
+
 if __name__ == "__main__":
     if len(argv) >= 2:
         with open(argv[1], "r") as file:
             config = json.loads(file.read())
             test(**config)
+
+    # test(100, 10000, 0.592746, 0.6, 1  )
+
+    # L = 10
+    # p = 0.6
+    # matrix = init_matrix(L, p)
+    # print_matrix(matrix)
+    # matrix_to_csv(matrix, f"./tests/clearL{L}p{p}.csv")
+    # print(burn(matrix))
+    # print_matrix(matrix)
+    # matrix_to_csv(matrix, f"./tests/burntL{L}p{p}.csv")
+    # print()
+    # clusters, M = hoshen_kopelman(matrix)
+    # print_matrix(clusters)
+    # print(M)
+    # matrix_to_csv(matrix, f"./tests/clustersL{L}p{p}.csv")
