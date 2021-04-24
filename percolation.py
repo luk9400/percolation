@@ -126,7 +126,6 @@ def test(L, T, p_0, p_k, dp):
         i += dp
 
     ave = []
-    dist = []
     print(f"L: {L}, T: {T}")
     for p in probabilities:
         print(f"p: {p}")
